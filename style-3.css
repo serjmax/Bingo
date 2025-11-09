@@ -223,7 +223,7 @@ body {
     .card {
         width: 280px;
     }
-    
+
     .cards-container {
         padding-left: calc((100vw - 280px) / 2);
         padding-right: calc((100vw - 280px) / 2);
@@ -234,7 +234,7 @@ body {
     .card {
         width: 360px;
     }
-    
+
     .cards-container {
         padding-left: calc((100vw - 360px) / 2);
         padding-right: calc((100vw - 360px) / 2);

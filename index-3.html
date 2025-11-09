@@ -41,6 +41,11 @@
         </div>
     </div>
 
+    <!-- Индикаторы слайдера -->
+    <div class="slider-indicators" id="sliderIndicators">
+        <!-- Кружки будут добавлены через JavaScript -->
+    </div>
+
     <!-- Кнопка Бинго -->
     <button class="bingo-button" id="bingoButton">
         <img src="Button_Bingo.png" alt="Бинго!" class="bingo-button__image">
@@ -185,6 +190,58 @@
             }
         }
 
+        // Функция создания индикаторов слайдера
+        function createSliderIndicators() {
+            const indicatorsContainer = document.getElementById('sliderIndicators');
+            indicatorsContainer.innerHTML = '';
+            
+            cardsData.forEach((cardData, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'slider-indicator';
+                if (index === 0) {
+                    dot.classList.add('slider-indicator--active');
+                }
+                dot.dataset.cardIndex = index;
+                indicatorsContainer.appendChild(dot);
+            });
+        }
+
+        // Функция обновления активного индикатора
+        function updateActiveIndicator(index) {
+            const indicators = document.querySelectorAll('.slider-indicator');
+            indicators.forEach((indicator, i) => {
+                if (i === index) {
+                    indicator.classList.add('slider-indicator--active');
+                } else {
+                    indicator.classList.remove('slider-indicator--active');
+                }
+            });
+        }
+
+        // Функция определения текущей видимой карточки
+        function getCurrentCardIndex() {
+            const wrapper = document.querySelector('.cards-wrapper');
+            const cards = document.querySelectorAll('.card');
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const wrapperCenter = wrapperRect.left + wrapperRect.width / 2;
+            
+            let closestIndex = 0;
+            let closestDistance = Infinity;
+            
+            cards.forEach((card, index) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const distance = Math.abs(cardCenter - wrapperCenter);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            
+            return closestIndex;
+        }
+
         // Функция отрисовки всех карточек
         function renderCards() {
             const container = document.getElementById('cardsContainer');
@@ -260,9 +317,22 @@
 
             preloadAllImages().then(() => {
                 renderCards();
+                createSliderIndicators();
             });
 
             updateBingoButtonState();
+            
+            // Отслеживание прокрутки карусели
+            const wrapper = document.querySelector('.cards-wrapper');
+            let scrollTimeout;
+            
+            wrapper.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const currentIndex = getCurrentCardIndex();
+                    updateActiveIndicator(currentIndex);
+                }, 100);
+            });
             
             document.getElementById('bingoButton').addEventListener('click', () => {
                 console.log('Бинго! Активные карточки:', Array.from(activeCards));
