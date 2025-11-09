@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Новогоднее Бинго</title>
+    <link rel="stylesheet" href="style-3.css">
+</head>
+<body>
+    <!-- Верхнее меню -->
+    <header class="header">
+        <img src="orb-w-user-pick.png" alt="Profile" class="header__profile">
+        <div class="header__logo">
+            <img src="orb-logo-ya-360-main.png" alt="Я 360" class="header__logo-image">
+        </div>
+        <div class="header__menu">
+            <img src="Menu_gamburger.png" alt="Menu" class="header__menu-icon">
+        </div>
+    </header>
+
+    <!-- Контейнер контента -->
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="title">
+            <img src="Logo.png" alt="Новогоднее Бинго" class="title__logo">
+        </div>
+
+        <!-- Обертка для прокрутки карусели -->
+        <div class="cards-wrapper">
+            <!-- Контейнер карточек -->
+            <div class="cards-container" id="cardsContainer">
+                <!-- Карточки будут добавлены через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка Бинго -->
+    <button class="bingo-button" id="bingoButton">
+        <img src="Button_Bingo.png" alt="Бинго!" class="bingo-button__image">
+    </button>
+
+    <script>
+        // Данные карточек - загружаем все 25 карточек
+        const cardsData = [];
+        for (let i = 1; i <= 25; i++) {
+            cardsData.push({
+                id: i,
+                inactiveImage: `Crads_mob/Card ${i}.png`,
+                activeImage: `Cards_mob_active/Card ${i}_active.png`
+            });
+        }
+
+        // Состояние активных карточек
+        const activeCards = new Set();
+        
+        // Кэш для предзагруженных изображений
+        const imageCache = new Map();
+
+        // Функция предзагрузки изображений
+        function preloadImage(src) {
+            if (imageCache.has(src)) {
+                return Promise.resolve(imageCache.get(src));
+            }
+            
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    imageCache.set(src, img);
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    imageCache.set(src, null);
+                    resolve(null);
+                };
+                img.src = src;
+            });
+        }
+
+        // Предзагрузка всех изображений
+        function preloadAllImages() {
+            const promises = [];
+            cardsData.forEach(cardData => {
+                promises.push(preloadImage(cardData.inactiveImage));
+                promises.push(preloadImage(cardData.activeImage));
+            });
+            promises.push(preloadImage("Cards_mob_active/Card 1_active.png"));
+            return Promise.all(promises);
+        }
+
+        // Функция для получения пути к активной карточке
+        function getActiveImagePath(cardId) {
+            return `Cards_mob_active/Card ${cardId}_active.png`;
+        }
+
+        // Функция обновления изображения карточки
+        function updateCardImage(cardElement, cardId, isActive) {
+            const img = cardElement.querySelector('.card__image');
+            if (!img) return;
+            
+            const imagePath = isActive ? getActiveImagePath(cardId) : cardsData[cardId - 1].inactiveImage;
+            const fallbackPath = isActive ? "Cards_mob_active/Card 1_active.png" : cardsData[cardId - 1].inactiveImage;
+            
+            const cachedImage = imageCache.get(imagePath);
+            const cachedFallback = imageCache.get(fallbackPath);
+            
+            if (cachedImage) {
+                img.src = imagePath;
+            } else if (cachedFallback) {
+                img.src = fallbackPath;
+            } else {
+                preloadImage(imagePath).then(() => {
+                    const loadedImage = imageCache.get(imagePath);
+                    if (loadedImage) {
+                        img.src = imagePath;
+                    } else {
+                        preloadImage(fallbackPath).then(() => {
+                            img.src = fallbackPath;
+                        });
+                    }
+                });
+            }
+        }
+
+        // Функция создания карточки
+        function createCard(cardData) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.cardId = cardData.id;
+            
+            const isActive = activeCards.has(cardData.id);
+            const imagePath = isActive ? getActiveImagePath(cardData.id) : cardData.inactiveImage;
+            const fallbackPath = isActive ? "Cards_mob_active/Card 1_active.png" : cardData.inactiveImage;
+
+            card.innerHTML = `
+                <img src="${imagePath}" alt="Card ${cardData.id}" class="card__image" 
+                     onerror="if(this.src !== '${fallbackPath}') { this.src = '${fallbackPath}'; }">
+            `;
+
+            // Обработчик клика
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleCard(cardData.id);
+            });
+
+            return card;
+        }
+
+        // Функция переключения состояния карточки
+        function toggleCard(cardId) {
+            const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (!cardElement) return;
+            
+            if (activeCards.has(cardId)) {
+                activeCards.delete(cardId);
+                updateCardImage(cardElement, cardId, false);
+            } else {
+                activeCards.add(cardId);
+                updateCardImage(cardElement, cardId, true);
+            }
+        }
+
+        // Функция отрисовки всех карточек
+        function renderCards() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            
+            cardsData.forEach(cardData => {
+                const card = createCard(cardData);
+                container.appendChild(card);
+            });
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            preloadAllImages().then(() => {
+                renderCards();
+            });
+            
+            document.getElementById('bingoButton').addEventListener('click', () => {
+                console.log('Бинго! Активные карточки:', Array.from(activeCards));
+                alert(`Выбрано карточек: ${activeCards.size}`);
+            });
+        });
+    </script>
+</body>
+</html>
+
+
