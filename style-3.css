@@ -179,6 +179,12 @@ body {
     width: 100%;
     height: auto;
     display: block;
+    filter: grayscale(1);
+    transition: filter 0.2s ease;
+}
+
+.bingo-button--active .bingo-button__image {
+    filter: none;
 }
 
 .bingo-button:active {
@@ -207,4 +213,3 @@ body {
         padding-right: calc((100vw - 360px) / 2);
     }
 }
-

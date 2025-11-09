@@ -165,6 +165,20 @@
                 activeCards.add(cardId);
                 updateCardImage(cardElement, cardId, true);
             }
+            
+            updateBingoButtonState();
+        }
+
+        // Обновление состояния кнопки Бинго
+        function updateBingoButtonState() {
+            const bingoButton = document.getElementById('bingoButton');
+            if (!bingoButton) return;
+            
+            if (activeCards.size > 0) {
+                bingoButton.classList.add('bingo-button--active');
+            } else {
+                bingoButton.classList.remove('bingo-button--active');
+            }
         }
 
         // Функция отрисовки всех карточек
@@ -184,6 +198,8 @@
             preloadAllImages().then(() => {
                 renderCards();
             });
+            
+            updateBingoButtonState();
             
             // Обработчик кнопки Бинго
             document.getElementById('bingoButton').addEventListener('click', () => {
