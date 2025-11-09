@@ -129,6 +129,7 @@ body {
     padding-left: calc((100vw - 320px) / 2);
     padding-right: calc((100vw - 320px) / 2);
     width: max-content;
+    height: 448px;
 }
 
 /* Карточка */
