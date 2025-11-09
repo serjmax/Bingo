@@ -32,6 +32,13 @@
                 <!-- Карточки будут добавлены через JavaScript -->
             </div>
         </div>
+
+        <!-- Индикатор карточек -->
+        <div class="cards-indicator">
+            <div class="cards-indicator__track" id="cardsIndicatorTrack">
+                <div class="cards-indicator__thumb" id="cardsIndicatorThumb"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Индикаторы слайдера -->
@@ -57,9 +64,14 @@
 
         // Состояние активных карточек
         const activeCards = new Set();
-        
+
         // Кэш для предзагруженных изображений
         const imageCache = new Map();
+
+        // Элементы индикатора карточек
+        let cardsWrapperElement = null;
+        let cardsIndicatorTrack = null;
+        let cardsIndicatorThumb = null;
 
         // Функция предзагрузки изображений
         function preloadImage(src) {
@@ -234,20 +246,80 @@
         function renderCards() {
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
-            
+
             cardsData.forEach(cardData => {
                 const card = createCard(cardData);
                 container.appendChild(card);
             });
+
+            updateCardsIndicator();
+        }
+
+        // Обновление позиции индикатора карточек
+        function updateCardsIndicator() {
+            if (!cardsWrapperElement || !cardsIndicatorTrack || !cardsIndicatorThumb) {
+                return;
+            }
+
+            const trackWidth = cardsIndicatorTrack.clientWidth;
+            const scrollWidth = cardsWrapperElement.scrollWidth;
+            const clientWidth = cardsWrapperElement.clientWidth;
+
+            if (trackWidth === 0 || scrollWidth === 0) {
+                return;
+            }
+
+            const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0);
+            const visibleRatio = scrollWidth > 0 ? clientWidth / scrollWidth : 1;
+            const minThumbWidth = 24;
+            const thumbWidth = Math.min(
+                trackWidth,
+                Math.max(trackWidth * visibleRatio, minThumbWidth)
+            );
+
+            cardsIndicatorThumb.style.width = `${thumbWidth}px`;
+
+            if (maxScrollLeft === 0) {
+                cardsIndicatorThumb.style.transform = 'translateX(0)';
+                return;
+            }
+
+            const maxThumbOffset = trackWidth - thumbWidth;
+            const scrollProgress = cardsWrapperElement.scrollLeft / maxScrollLeft;
+            const offset = maxThumbOffset * scrollProgress;
+
+            cardsIndicatorThumb.style.transform = `translateX(${offset}px)`;
+        }
+
+        // Инициализация индикатора карточек
+        function initializeCardsIndicator() {
+            cardsWrapperElement = document.querySelector('.cards-wrapper');
+            cardsIndicatorTrack = document.getElementById('cardsIndicatorTrack');
+            cardsIndicatorThumb = document.getElementById('cardsIndicatorThumb');
+
+            if (!cardsWrapperElement || !cardsIndicatorTrack || !cardsIndicatorThumb) {
+                return;
+            }
+
+            const handleScroll = () => {
+                window.requestAnimationFrame(updateCardsIndicator);
+            };
+
+            cardsWrapperElement.addEventListener('scroll', handleScroll, { passive: true });
+            window.addEventListener('resize', () => window.requestAnimationFrame(updateCardsIndicator));
+
+            updateCardsIndicator();
         }
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
+            initializeCardsIndicator();
+
             preloadAllImages().then(() => {
                 renderCards();
                 createSliderIndicators();
             });
-            
+
             updateBingoButtonState();
             
             // Отслеживание прокрутки карусели
