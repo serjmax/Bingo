@@ -114,7 +114,7 @@ body {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x;
     width: 100%;
-    padding-top: 200px;
+    padding-top: 122px;
     padding-bottom: 0;
     margin-bottom: 16px;
     scroll-snap-type: x mandatory;
@@ -126,15 +126,15 @@ body {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    padding-left: calc((100vw - 320px) / 2);
-    padding-right: calc((100vw - 320px) / 2);
+    padding-left: calc((100vw - 256px) / 2);
+    padding-right: calc((100vw - 256px) / 2);
     width: max-content;
     height: 448px;
 }
 
 /* Карточка */
 .card {
-    width: 320px;
+    width: 256px;
     aspect-ratio: 0.75;
     border-radius: 16px;
     cursor: pointer;
@@ -152,7 +152,7 @@ body {
 }
 
 .card__image {
-    width: 320px;
+    width: 256px;
     /* height: 100%; */
     object-fit: cover;
     display: block;
@@ -195,6 +195,8 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
+    display: flex;
+    justify-content: center;
     border: none;
     background: transparent;
     padding: 0;
@@ -204,9 +206,10 @@ body {
 }
 
 .bingo-button__image {
-    width: 100%;
+    width: 50%;
     height: auto;
     display: block;
+    margin: 0 auto;
     filter: grayscale(1);
     transition: filter 0.2s ease;
 }
@@ -222,22 +225,30 @@ body {
 /* Адаптивность */
 @media (max-width: 375px) {
     .card {
-        width: 280px;
+        width: 224px;
+    }
+    
+    .card__image {
+        width: 224px;
     }
 
     .cards-container {
-        padding-left: calc((100vw - 280px) / 2);
-        padding-right: calc((100vw - 280px) / 2);
+        padding-left: calc((100vw - 224px) / 2);
+        padding-right: calc((100vw - 224px) / 2);
     }
 }
 
 @media (min-width: 480px) {
     .card {
-        width: 360px;
+        width: 288px;
+    }
+    
+    .card__image {
+        width: 288px;
     }
 
     .cards-container {
-        padding-left: calc((100vw - 360px) / 2);
-        padding-right: calc((100vw - 360px) / 2);
+        padding-left: calc((100vw - 288px) / 2);
+        padding-right: calc((100vw - 288px) / 2);
     }
 }
