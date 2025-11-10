@@ -119,6 +119,7 @@ body {
     margin-bottom: 16px;
     scroll-snap-type: x mandatory;
     scroll-padding: 0;
+    height: 482px;
 }
 
 /* Контейнер карточек */
